@@ -1,7 +1,3 @@
-# Code source: Gaël Varoquaux
-# Modified for documentation by Jaques Grobler
-# License: BSD 3 clause
-
 from sklearn import datasets
 
 import autograd.numpy as np   # Thinly-wrapped version of Numpy
