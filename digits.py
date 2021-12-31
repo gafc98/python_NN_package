@@ -3,7 +3,7 @@ from sklearn import datasets
 import autograd.numpy as np   # Thinly-wrapped version of Numpy
 from autograd import grad
 import matplotlib.pyplot as plt
-from NN_class import NN_classifier
+from NN import NN_classifier
 
 # Load the digits dataset
 digits = datasets.load_digits()
