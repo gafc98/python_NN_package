@@ -22,7 +22,7 @@ class NN_classifier:
         low = np.min(self.x)
         high = np.max(self.x)
         W = set_weights(np.random.rand(self.lrs[1], self.lrs[0]), -1, 1)
-        b = set_weights(np.random.rand(self.lrs[1],1), -low, high)
+        b = set_weights(np.random.rand(self.lrs[1],1), low, high)
         params = [(W, b)]
         for i in range(1, len(self.lrs) - 1):
             W = set_weights(np.random.rand(self.lrs[i+1], self.lrs[i]), -1, 1)
@@ -49,7 +49,7 @@ class NN_classifier:
         return y
     
     def cost(self, x, y, p = None):
-        y_hat = NN_classifier.eval(self, x, p)
+        y_hat = self.eval(x, p)
         sum = 0.0
         for i in range(self.n_output):
             sum -= y[i] * np.log( y_hat[i] )
@@ -90,12 +90,11 @@ class NN_classifier:
             self.lr = lr
 
         norm = 1.0 / self.N_samples
-
+        g = grad(lambda p, x, y: self.cost(x, y, p))
         for epoch in range(n_epoch):
             c = 0
             for i in np.random.permutation(self.N_samples):
-                g = grad(lambda p: NN_classifier.cost(self, x[i], y[i], p))
-                dp = g(self.p)
+                dp = g(self.p, x[i], y[i])
                 
                 l = 0
                 for dW, db in dp:
@@ -137,7 +136,7 @@ class NN_interpolator(NN_classifier):
         low = np.min(self.x)
         high = np.max(self.x)
         W = set_weights(np.random.rand(self.lrs[1], self.lrs[0]), -1, 1)
-        b = set_weights(np.random.rand(self.lrs[1],1), -low/10, high/10)
+        b = set_weights(np.random.rand(self.lrs[1],1), low * 0.8, high * 0.8)
         params = [(W, b)]
         for i in range(1, len(self.lrs) - 2):
             W = set_weights(np.random.rand(self.lrs[i+1], self.lrs[i]), -1, 1)
@@ -147,7 +146,7 @@ class NN_interpolator(NN_classifier):
         low = np.min(self.y)
         high = np.max(self.y)
         W = set_weights(np.random.rand(self.lrs[i+1], self.lrs[i]), -1, 1)
-        b = set_weights(np.random.rand(self.lrs[i+1],1), -low, high)
+        b = set_weights(np.random.rand(self.lrs[i+1],1), low, high)
         params.append( (W, b) )
         self.p = params
         return self
@@ -169,7 +168,7 @@ class NN_interpolator(NN_classifier):
         return y
     
     def cost(self, x, y, p = None):
-        y_hat = NN_interpolator.eval(self, x, p)
+        y_hat = self.eval(x, p)
         e = y_hat - y
         if self.cost_metric == "L1":
             e = np.abs(e)
@@ -187,11 +186,12 @@ class NN_interpolator(NN_classifier):
             lr = self.lr
 
         last_p = 0
+        g = grad(lambda p, x, y: self.cost(x, y, p))
         for epoch in range(n_epoch):
             c = 0.0
             for i in np.random.permutation(self.N_samples):
-                g = grad(lambda p: NN_interpolator.cost(self, x[i], y[i], p))
-                dp = g(self.p)
+                #g = grad(lambda p: self.cost(x[i], y[i], p))
+                dp = g(self.p, x[i], y[i])
                 
                 norm = 1.0 / (self.N_samples * self.n_output)
 
@@ -230,7 +230,7 @@ class NN_interpolator(NN_classifier):
 def main():
     x = np.linspace(-20, 20, num = 100)
     y = np.sin(x)
-    model = NN_interpolator([40, 30, 20, 20, 20], 1, 1, lr = 0.1)
+    model = NN_interpolator([40, 30, 20, 20, 20], 1, 1, lr = 1)
     model.set_train_data(x, y)
     model.set_init_params()
     model.train( 10000, plot_rate = 100, decay = 0.999)

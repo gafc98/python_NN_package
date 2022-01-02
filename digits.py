@@ -24,7 +24,7 @@ np.array(y)
 model = NN_classifier(hls = [40, 30, 20, 20, 20], lr = 1).set_train_data(x[:n_train], y[:n_train])
 model.set_init_params()
 
-model = model.load_model('NN_params')
+#model = model.load_model('NN_params')
 
 for _ in range(20):
     model.train(n_epoch= 5, decay = 0.99)
